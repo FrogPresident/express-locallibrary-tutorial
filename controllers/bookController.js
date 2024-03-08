@@ -40,7 +40,7 @@ exports.book_list = function (req, res, next) {
     Book.find({}, "title author")
         .populate("author")
         .sort({'title': 1})
-        .then((list_books) => { // 改用 list_books 來接收查詢結果
+        .then((list_books) => {
             res.render("book_list", {title: "Book List", book_list: list_books});
         }).catch((err) => {
         return next(err);
@@ -63,7 +63,7 @@ exports.book_detail = asyncHandler(async (req, res, next) => {
             return next(err)
         }
         res.render('book_detail', {
-            title: book.title, // 使用书籍的标题作为页面标题
+            title: book.title,
             book,
             book_instances: bookInstances
         })
@@ -135,14 +135,37 @@ exports.book_create_post = [
 ]
 
 // Display book delete form on GET.
-exports.book_delete_get = function (req, res) {
-    res.send("NOT IMPLEMENTED: Book delete GET");
-};
+exports.book_delete_get = asyncHandler(async (req, res, next) => {
+    const [
+        book,
+        allInstancesByBook
+    ] = await Promise.all([
+        Book.findById(req.params.id).populate('author').exec(),
+        BookInstance.find({book: req.params.id}, "book imprint").populate('book').exec(),
+    ])
+    if (book === null) {
+        res.redirect('/catalog/books')
+    }
+    res.render('book_delete', {title: 'Book Delete', book: book, book_instances: allInstancesByBook})
+})
 
 // Handle book delete on POST.
-exports.book_delete_post = function (req, res) {
-    res.send("NOT IMPLEMENTED: Book delete POST");
-};
+exports.book_delete_post = asyncHandler(async (req, res, next) => {
+    const [
+        book,
+        allInstancesByBook
+    ] = await Promise.all([
+        Book.findById(req.params.id).populate('author').exec(),
+        BookInstance.find({book: req.params.id}, "book imprint").populate('book').exec(),
+    ])
+    if (BookInstance > 0) {
+        res.render('book_delete', {title: 'Book Delete', book: book, book_instances: allInstancesByBook})
+        return
+    } else {
+        await Book.findByIdAndDelete(req.body.bookid).exec()
+        res.redirect('/catalog/books')
+    }
+})
 
 // Display book update form on GET.
 exports.book_update_get = asyncHandler(async (req, res, next) => {
