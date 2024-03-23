@@ -14,7 +14,7 @@ var app = express();
 //Set up mongoose connection
 
 var mongoose = require("mongoose");
-var mongoDB = 'mongodb+srv://xup61i6u6:a2550943@cluster0.pxwiurn.mongodb.net/?retryWrites=true&w=majority';
+var mongoDB = 'mongodb+srv://xup61i6u6:<password>@cluster0.pxwiurn.mongodb.net/?retryWrites=true&w=majority';
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
